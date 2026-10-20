@@ -10,6 +10,12 @@ One HTML file is the whole film: a rebuilt agent window, terminal, keyboard and 
 
 https://github.com/user-attachments/assets/117274d5-ca7b-4d12-bd75-aea07845cc07
 
+<div align="center">
+
+**Watch on YouTube:** [youtu.be/Qg5QCE_V0Pg](https://youtu.be/Qg5QCE_V0Pg) · **Download:** [release v1.0.0](https://github.com/ChanMeng666/a11y-loop-promo-film/releases/tag/v1.0.0)
+
+</div>
+
 ## What the film shows
 
 The stage tracker at the top of the frame (PLAN · WRITE · AUDIT · FIX · REPORT) carries the viewer through one complete loop:
@@ -77,6 +83,6 @@ To recapture the screenshots, keep an a11y-loop checkout with its browser instal
 
 ## Credits and license
 
-Code and text: MIT, © 2026 Chan Meng. Third-party pieces keep their own licenses (GSAP, the huashu-motion runtime, the fonts, the instrument samples); see [`THIRD_PARTY.md`](THIRD_PARTY.md). The film was directed and built with Claude Code using the huashu-motion skill.
+Code: MIT, © 2026 Chan Meng ([LICENSE](LICENSE)). The film, its score and soundtrack, and the screenshots: CC BY 4.0, credit "a11y-loop launch film by Chan Meng" ([LICENSE-MEDIA.md](LICENSE-MEDIA.md)). Third-party pieces keep their own licenses (GSAP, the huashu-motion runtime, the fonts, the instrument samples); see [`THIRD_PARTY.md`](THIRD_PARTY.md). The film was directed and built with Claude Code using the huashu-motion skill.
 
 a11y-loop: [repository](https://github.com/ChanMeng666/a11y-loop) · [docs](https://ChanMeng666.github.io/a11y-loop/) · [npm](https://www.npmjs.com/package/a11y-loop)
