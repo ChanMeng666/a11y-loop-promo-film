@@ -1,0 +1,819 @@
+<!doctype html>
+<html lang="en" data-composition-variables='[
+  {"id":"hookLine1","type":"string","label":"Hook line 1","default":"Your coding agent writes the UI."},
+  {"id":"hookLine2","type":"string","label":"Hook line 2","default":"a11y-loop checks it in a real browser."},
+  {"id":"tagline","type":"string","label":"End tagline","default":"Accessible UI, checked in a real browser."},
+  {"id":"installCmd","type":"string","label":"End install command","default":"npx skills add ChanMeng666/a11y-loop"},
+  {"id":"repoUrl","type":"string","label":"End URL line","default":"github.com/ChanMeng666/a11y-loop · open source · MIT"},
+  {"id":"accent","type":"color","label":"Brand blue","default":"#7DA2FF","group":"Colour"},
+  {"id":"bg","type":"color","label":"Stage ink","default":"#0A0F1C","group":"Colour"},
+  {"id":"endHold","type":"number","label":"End hold (s)","default":4.8,"min":1,"max":10,"step":0.1,"group":"Timing"}
+]'>
+<head>
+<meta charset="utf-8">
+<title>a11y-loop · launch film</title>
+<script src="vendor/gsap.min.js"></script>
+<script src="vendor/om.js"></script>
+<style id="om-fonts">
+@font-face { font-family: "Inter"; src: url("assets/fonts/Inter-var.woff") format("woff"); font-weight: 100 900; font-style: normal; }
+@font-face { font-family: "Cascadia Mono"; src: url("assets/fonts/CascadiaMono.ttf") format("truetype"); font-weight: 200 700; font-style: normal; }
+</style>
+<style>
+  :root { --panel: #121A2B; --panel2: #18223A; --line: #2A3653; --text: #E8EDF7; --dim: #A9B5CC; --red: #FF8A8A; --green: #5EE0A0; --amber: #FFC66B; }
+  html, body { margin: 0; width: 100%; height: 100%; overflow: hidden; background: #000; }
+  #film { position: relative; width: 1920px; height: 1080px; overflow: hidden; background: var(--bg); color: var(--text); font-family: "Inter", sans-serif; font-weight: 450; }
+  .mono { font-family: "Cascadia Mono", monospace; }
+  .bgfx { position: absolute; inset: 0; background:
+      radial-gradient(1100px 700px at 50% -10%, #1B2A55 0%, transparent 65%),
+      radial-gradient(900px 600px at 100% 110%, #13203F 0%, transparent 60%); }
+  .grid { position: absolute; inset: 0; opacity: .35; background-image:
+      linear-gradient(#1A2440 1px, transparent 1px), linear-gradient(90deg, #1A2440 1px, transparent 1px);
+      background-size: 80px 80px; }
+  .scene { position: absolute; inset: 0; visibility: hidden; }
+
+  /* windows */
+  .win { position: absolute; background: var(--panel); border: 1px solid var(--line); border-radius: 18px; box-shadow: 0 40px 90px #00000080, 0 2px 0 #ffffff08 inset; overflow: hidden; }
+  .win-bar { height: 48px; display: flex; align-items: center; gap: 10px; padding: 0 20px; background: var(--panel2); border-bottom: 1px solid var(--line); }
+  .win-bar i { width: 13px; height: 13px; border-radius: 50%; background: #3A4766; display: block; }
+  .win-bar span { margin-left: 14px; font-size: 19px; color: var(--dim); font-weight: 500; }
+  .term { padding: 26px 32px; font-family: "Cascadia Mono", monospace; font-size: 27px; line-height: 1.55; white-space: pre-wrap; }
+  .term .p { color: var(--accent); }
+  .ok { color: var(--green); } .bad { color: var(--red); } .dim { color: var(--dim); } .acc { color: var(--accent); } .warn { color: var(--amber); }
+  .caret { display: inline-block; width: .55em; height: 1.05em; margin-left: 2px; vertical-align: -0.15em; background: var(--accent); }
+
+  .caption { position: absolute; left: 0; right: 0; bottom: 58px; text-align: center; font-size: 48px; font-weight: 720; letter-spacing: -0.8px; }
+  .caption small { display: block; margin-top: 8px; font-size: 24px; font-weight: 500; color: var(--dim); letter-spacing: 0; }
+  .eyebrow { position: absolute; left: 96px; top: 64px; font-size: 22px; letter-spacing: 6px; font-weight: 700; color: var(--accent); }
+
+  /* tracker */
+  #tracker { position: absolute; left: 50%; top: 40px; transform: translateX(-50%); display: flex; align-items: center; gap: 0; visibility: hidden; }
+  .step { display: flex; align-items: center; gap: 12px; font-size: 21px; font-weight: 700; letter-spacing: 3px; color: #7F8BA6; }
+  .step b { width: 30px; height: 30px; border-radius: 50%; border: 2px solid #46557A; display: grid; place-items: center; font-size: 16px; letter-spacing: 0; color: transparent; }
+  .step.on { color: var(--text); } .step.on b { border-color: var(--accent); background: var(--accent); box-shadow: 0 0 0 6px #7DA2FF30; }
+  .step.done { color: var(--green); } .step.done b { border-color: var(--green); background: var(--green); color: #0A0F1C; }
+  .link { width: 70px; height: 2px; margin: 0 18px; background: #34405E; }
+
+  /* keyboard */
+  #kbd-wrap { position: absolute; left: 0; right: 0; top: 560px; height: 520px; perspective: 1400px; visibility: hidden; }
+  #kbd { position: absolute; left: 50%; top: 0; width: 1340px; margin-left: -670px; padding: 26px; border-radius: 28px; background: linear-gradient(#1A2340, #121A2E); border: 1px solid #2E3B5E; transform: rotateX(38deg); transform-origin: 50% 0; box-shadow: 0 60px 80px #00000090; }
+  .krow { display: flex; gap: 12px; justify-content: center; margin-bottom: 12px; }
+  .key { width: 98px; height: 86px; border-radius: 14px; background: #222D4A; border: 1px solid #36446A; box-shadow: 0 7px 0 #0B1122; display: grid; place-items: center; font-size: 30px; font-weight: 600; color: #C9D3E8; }
+  .key.wide { width: 210px; font-size: 22px; } .key.space { width: 640px; }
+  .key.down { background: var(--accent); color: #0A0F1C; box-shadow: 0 2px 0 #0B1122; transform: translateY(5px); }
+
+  /* hook */
+  .hook-l1 { position: absolute; left: 0; right: 0; top: 112px; text-align: center; font-size: 66px; font-weight: 780; letter-spacing: -1.6px; }
+  .hook-l2 { position: absolute; left: 0; right: 0; top: 200px; text-align: center; font-size: 66px; font-weight: 780; letter-spacing: -1.6px; color: var(--accent); }
+  .composer { position: absolute; left: 330px; top: 320px; width: 1260px; height: 190px; border-radius: 22px; background: var(--panel); border: 1px solid #3A4A72; box-shadow: 0 30px 70px #00000080; }
+  .composer .lab { position: absolute; left: 32px; top: 22px; font-size: 19px; color: var(--dim); font-weight: 600; letter-spacing: 1px; }
+  .composer .txt { position: absolute; left: 32px; top: 58px; width: 1060px; font-size: 34px; line-height: 1.4; font-weight: 500; }
+  .send { position: absolute; right: 26px; bottom: 24px; width: 64px; height: 64px; border-radius: 50%; background: var(--accent); display: grid; place-items: center; }
+  .send svg { width: 30px; height: 30px; }
+
+  /* install */
+  .chips { position: absolute; left: 0; right: 0; top: 700px; display: flex; gap: 18px; justify-content: center; align-items: center; }
+  .chip { padding: 16px 26px; border-radius: 40px; background: var(--panel2); border: 1px solid #3A4A72; font-size: 28px; font-weight: 650; }
+  .chip.lab { background: none; border: none; color: var(--dim); font-weight: 500; }
+
+  /* plan */
+  .agent .body { position: absolute; left: 0; right: 0; top: 48px; bottom: 0; padding: 34px 40px; }
+  .bubble { width: 640px; padding: 22px 26px; border-radius: 16px; background: var(--panel2); border: 1px solid var(--line); font-size: 25px; line-height: 1.45; }
+  .bubble h4 { margin: 0 0 10px; font-size: 18px; letter-spacing: 3px; color: var(--accent); }
+  .secline { font-family: "Cascadia Mono", monospace; font-size: 19px; line-height: 1.6; color: var(--text); white-space: nowrap; }
+  .secline b { color: var(--green); font-weight: 600; }
+  .btn { position: absolute; padding: 16px 30px; border-radius: 12px; font-size: 24px; font-weight: 700; }
+  .btn.primary { background: var(--accent); color: #0A0F1C; }
+  .btn.ghost { border: 1px solid #46557A; color: var(--dim); }
+  .gate { position: absolute; background: #160F18; border: 1px solid #5A2A36; border-left: 8px solid var(--red); border-radius: 16px; box-shadow: 0 40px 90px #000000a0; padding: 30px 36px; }
+  .gate.good { background: #0E1A17; border-color: #245A44; border-left-color: var(--green); }
+  .gate .tag { font-family: "Cascadia Mono", monospace; font-size: 20px; color: var(--dim); }
+  .gate .head { margin-top: 10px; font-family: "Cascadia Mono", monospace; font-size: 24px; font-weight: 600; }
+  .gate .big { margin-top: 14px; font-size: 46px; font-weight: 780; letter-spacing: -1px; }
+  .items { margin-top: 22px; display: grid; grid-template-columns: 1fr 1fr; gap: 12px 26px; }
+  .item { font-size: 24px; font-weight: 550; display: flex; gap: 12px; align-items: center; }
+  .item i { font-style: normal; width: 30px; height: 30px; border-radius: 8px; display: grid; place-items: center; font-size: 19px; font-weight: 800; background: #3A1E26; color: var(--red); }
+  .item.yes i { background: #163A2C; color: var(--green); }
+
+  /* build */
+  .code { padding: 20px 26px; font-family: "Cascadia Mono", monospace; font-size: 18.5px; line-height: 1.62; white-space: pre; }
+  .code .c { color: #8C99B5; } .code .t { color: #FF9DBA; } .code .a { color: #9CC4FF; } .code .s { color: #B7E39A; }
+  .urlbar { flex: 1; margin-left: 18px; height: 30px; border-radius: 8px; background: #0E1526; color: var(--dim); font-size: 17px; display: flex; align-items: center; padding-left: 14px; font-family: "Cascadia Mono", monospace; }
+  .page { position: absolute; left: 0; right: 0; top: 48px; bottom: 0; background: #fff; overflow: hidden; }
+  .page img { position: absolute; left: 0; top: 0; width: 100%; display: block; }
+  .page img.narrow { left: 50%; width: 240px; margin-left: -120px; box-shadow: 0 0 0 1px #ccd; }
+  .passchip { position: absolute; left: 24px; bottom: 22px; padding: 12px 20px; border-radius: 12px; background: #0A0F1CE6; border: 1px solid #3A4A72; font-size: 24px; font-weight: 700; color: var(--text); }
+  .passchip span { color: var(--accent); }
+  .hl { position: absolute; border: 3px solid #FF4D5E; border-radius: 6px; background: #FF4D5E1A; }
+
+  /* audit terminal */
+  .vhead { display: flex; align-items: center; gap: 18px; padding: 20px 30px 6px; font-family: "Cascadia Mono", monospace; font-size: 34px; font-weight: 700; }
+  .vrow { display: flex; gap: 18px; padding: 0 30px; font-family: "Cascadia Mono", monospace; font-size: 22px; line-height: 1.72; white-space: nowrap; }
+  .vrow .st { width: 98px; color: var(--red); font-weight: 700; }
+  .vrow.fixed .st { color: var(--green); }
+  .vrow .sc { width: 120px; color: var(--dim); }
+  .vrow .rule { width: 340px; }
+  .vrow .n { width: 70px; text-align: right; color: var(--dim); }
+  .vrow .by { color: var(--accent); font-size: 18px; padding-top: 3px; }
+  .loopicon { width: 56px; height: 56px; }
+
+  /* contrast card */
+  .sw { position: absolute; width: 300px; height: 210px; border-radius: 16px; background: #fff; display: grid; place-items: center; font-size: 96px; font-weight: 800; }
+  .swl { position: absolute; font-family: "Cascadia Mono", monospace; font-size: 24px; text-align: center; width: 300px; }
+
+  /* converged */
+  .conv { position: absolute; left: 160px; right: 160px; top: 330px; text-align: center; font-family: "Cascadia Mono", monospace; font-size: 54px; font-weight: 700; color: var(--green); letter-spacing: -1px; }
+  .nums { position: absolute; left: 0; right: 0; top: 470px; text-align: center; font-size: 150px; font-weight: 820; letter-spacing: -5px; }
+  .nums .from { color: var(--red); } .nums .to { color: var(--green); } .nums .arr { color: var(--dim); font-weight: 400; margin: 0 40px; }
+  .foot { position: absolute; left: 0; right: 0; top: 690px; text-align: center; font-size: 26px; color: var(--dim); }
+
+  /* honest */
+  .sum { font-family: "Cascadia Mono", monospace; font-size: 24px; padding: 26px 34px 6px; }
+  .mitem { display: flex; gap: 18px; align-items: flex-start; padding: 0 34px; margin-top: 18px; font-size: 27px; line-height: 1.35; }
+  .mitem i { flex: none; width: 30px; height: 30px; margin-top: 2px; border-radius: 7px; border: 2px solid #5A6A90; }
+  .mitem .sc { flex: none; width: 132px; font-family: "Cascadia Mono", monospace; font-size: 21px; color: var(--accent); padding-top: 4px; }
+  .claim { position: absolute; left: 0; right: 0; top: 780px; text-align: center; font-size: 40px; font-weight: 750; color: var(--accent); }
+
+  /* agents */
+  .atitle { position: absolute; left: 160px; top: 140px; font-size: 78px; font-weight: 800; letter-spacing: -2px; }
+  .atitle span { color: var(--accent); }
+  .card { position: absolute; width: 500px; height: 300px; border-radius: 20px; background: var(--panel); border: 1px solid var(--line); padding: 30px 32px; box-sizing: border-box; box-shadow: 0 30px 70px #00000070; }
+  .card h3 { margin: 0; font-size: 33px; font-weight: 780; letter-spacing: -.5px; }
+  .card .m { margin-top: 16px; font-family: "Cascadia Mono", monospace; font-size: 21px; line-height: 1.55; color: var(--accent); }
+  .card p { margin: 14px 0 0; font-size: 23px; line-height: 1.4; color: var(--dim); }
+
+  /* end */
+  .logo { position: absolute; left: 50%; top: 150px; width: 300px; height: 300px; margin-left: -150px; }
+  .word { position: absolute; left: 0; right: 0; top: 470px; text-align: center; font-size: 132px; font-weight: 820; letter-spacing: -5px; }
+  .tagline { position: absolute; left: 0; right: 0; top: 650px; text-align: center; font-size: 46px; font-weight: 550; color: var(--dim); }
+  .pill { position: absolute; left: 50%; top: 770px; transform: translateX(-50%); padding: 22px 38px; border-radius: 60px; background: var(--panel); border: 1px solid #3A4A72; font-family: "Cascadia Mono", monospace; font-size: 34px; white-space: nowrap; }
+  .pill .p { color: var(--accent); }
+  .cli { position: absolute; left: 0; right: 0; top: 880px; text-align: center; font-family: "Cascadia Mono", monospace; font-size: 26px; color: var(--dim); }
+  .url { position: absolute; left: 0; right: 0; top: 940px; text-align: center; font-size: 26px; color: var(--dim); }
+
+  /* cursor */
+  #cursor { position: absolute; left: 0; top: 0; width: 46px; height: 46px; visibility: hidden; filter: drop-shadow(0 6px 10px #00000080); }
+  #ripple { position: absolute; left: 0; top: 0; width: 90px; height: 90px; margin: -45px 0 0 -45px; border-radius: 50%; border: 4px solid var(--accent); visibility: hidden; }
+</style>
+</head>
+<body>
+<div id="film" data-composition-id="film" data-width="1920" data-height="1080" data-fps="30">
+  <audio id="om-sound" src="assets/sound.wav" data-start="0" data-duration="64" data-track-index="8" data-volume="1"></audio>
+  <div class="bgfx"></div>
+  <div class="grid"></div>
+
+  <!-- 1 · HOOK ─────────────────────────────────────────────── -->
+  <section class="scene" id="s-hook">
+    <div class="hook-l1" data-om-id="hook-line-1" data-var-text="hookLine1">Your coding agent writes the UI.</div>
+    <div class="hook-l2" data-om-id="hook-line-2" data-var-text="hookLine2">a11y-loop checks it in a real browser.</div>
+    <div class="composer" data-om-id="composer">
+      <div class="lab">ASK YOUR AGENT</div>
+      <div class="txt" id="t-prompt"></div>
+      <div class="send" id="send"><svg viewBox="0 0 24 24"><path d="M12 19V5M5 12l7-7 7 7" stroke="#0A0F1C" stroke-width="3" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+    </div>
+  </section>
+
+  <!-- 2 · INSTALL ──────────────────────────────────────────── -->
+  <section class="scene" id="s-install">
+    <div class="eyebrow">INSTALL · ONCE</div>
+    <div class="win" style="left:310px; top:120px; width:1300px; height:540px" data-om-id="install-terminal">
+      <div class="win-bar"><i></i><i></i><i></i><span>Terminal</span></div>
+      <div class="term"><div><span class="p">$ </span><span id="t-skills"></span></div><div id="o-skills" class="ok">✓ Found 1 skill: a11y-loop</div><div><span class="p">$ </span><span id="t-npm"></span></div><div><span class="p">$ </span><span id="t-browser"></span></div><div><span class="p">$ </span><span id="t-doctor"></span></div><div id="o-d1"><span class="ok">ok  </span>  Node 24.15.0</div><div id="o-d2"><span class="ok">ok  </span>  chromium: headless launch succeeded</div><div id="o-d3"><span class="dim">info</span>  axe-core 4.14.0</div><div id="o-d4" class="ok">An audit can run here.</div></div>
+    </div>
+    <div class="chips" data-om-id="agent-chips">
+      <span class="chip lab">Works in</span>
+      <span class="chip">Claude Code</span><span class="chip">Codex</span><span class="chip">Cursor</span><span class="chip">Copilot</span><span class="chip">Gemini CLI</span>
+    </div>
+    <div class="caption" id="cap-install" data-om-id="cap-install">One skill. One CLI. Any agent.<small>Agent Skills standard · npm package · Claude Code and Codex plugins</small></div>
+  </section>
+
+  <!-- 3 · PLAN ─────────────────────────────────────────────── -->
+  <section class="scene" id="s-plan">
+    <div class="win agent" style="left:180px; top:140px; width:1480px; height:740px" data-om-id="agent-plan">
+      <div class="win-bar"><i></i><i></i><i></i><span>Agent · plan mode</span></div>
+      <div class="body">
+        <div class="bubble"><h4>PLAN</h4>Build a landing page for Aotearoa Web Summit 2026: a hero with a register button, a sponsor ticker, programme tables for both days, and a register dialog.</div>
+        <div id="secbox" style="margin-top:22px">
+          <div class="secline" id="sl0"><b>### Accessibility</b></div>
+          <div class="secline" id="sl1">- Target: WCAG 2.2 Level AA</div>
+          <div class="secline" id="sl2">- Per-component: dialog → SC 2.1.2, 2.4.3 + APG dialog</div>
+          <div class="secline" id="sl3">- Foreclosing: autoplay ticker → pause button</div>
+          <div class="secline" id="sl4">- Color tokens: a11y-loop contrast --fix, light + dark</div>
+          <div class="secline" id="sl5">- Structure: one h1, landmarks, skip link</div>
+          <div class="secline" id="sl6">- Verification: --interact dialog state; audit in CI</div>
+          <div class="secline" id="sl7">- Manual budget: screen reader + keyboard walk-through</div>
+        </div>
+      </div>
+      <div class="btn ghost" style="right:250px; bottom:34px">Keep planning</div>
+      <div class="btn primary" id="approve" style="right:40px; bottom:34px">Approve plan</div>
+    </div>
+    <div class="gate" id="gate-plan" style="left:1000px; top:250px; width:820px; box-sizing:border-box" data-om-id="plan-gate">
+      <div class="tag">plan gate · a11y-loop plan-check</div>
+      <div class="head bad" id="pg-head">FINDING: UI plan, accessibility thin or absent</div>
+      <div class="big" id="pg-big">Plan items answered: <span class="bad" id="pg-n">0 of 7</span></div>
+      <div class="items">
+        <div class="item" id="pi0"><i>✕</i>Target</div><div class="item" id="pi1"><i>✕</i>Per-component criteria</div>
+        <div class="item" id="pi2"><i>✕</i>Foreclosing decisions</div><div class="item" id="pi3"><i>✕</i>Color tokens</div>
+        <div class="item" id="pi4"><i>✕</i>Structure</div><div class="item" id="pi5"><i>✕</i>Verification</div>
+        <div class="item" id="pi6"><i>✕</i>Manual budget</div>
+      </div>
+    </div>
+    <div class="caption" id="cap-plan" data-om-id="cap-plan">Accessibility is decided while it is still a plan.<small>Claude Code plan gate · <span class="mono">a11y-loop plan-check</span> for every other agent and CI</small></div>
+  </section>
+
+  <!-- 4 · BUILD ────────────────────────────────────────────── -->
+  <section class="scene" id="s-build">
+    <div class="win" style="left:110px; top:130px; width:840px; height:760px" data-om-id="editor">
+      <div class="win-bar"><i></i><i></i><i></i><span>demo/before/index.html</span></div>
+      <div class="code" id="codebox"></div>
+    </div>
+    <div class="win" style="left:980px; top:130px; width:830px; height:760px" data-om-id="browser-build">
+      <div class="win-bar"><i></i><i></i><i></i><div class="urlbar">127.0.0.1:63749</div></div>
+      <div class="page"><img id="build-shot" src="assets/shots/before-full.png" alt=""></div>
+    </div>
+    <div class="caption" data-om-id="cap-build">The demo: a page with the mistakes agents commonly ship.<small>demo/before in the repo · 16 seeded failure classes · used below so every number is real</small></div>
+  </section>
+
+  <!-- 5 · GATE ─────────────────────────────────────────────── -->
+  <section class="scene" id="s-gate">
+    <div class="win agent" style="left:180px; top:130px; width:1560px; height:740px" data-om-id="agent-done">
+      <div class="win-bar"><i></i><i></i><i></i><span>Agent</span></div>
+      <div class="body"><div style="font-size:38px; font-weight:600"><span id="t-done"></span></div></div>
+    </div>
+    <div class="gate" id="gate-stop" style="left:260px; top:300px; width:1400px; box-sizing:border-box" data-om-id="audit-gate">
+      <div class="tag">Stop hook · a11y-loop audit gate</div>
+      <div class="head bad" style="white-space:normal; line-height:1.5">this session changed user interface files and has not run <span class="acc">a11y-loop audit</span> since the last change:</div>
+      <div class="mono" style="font-size:24px; margin-top:8px">- demo/before/index.html</div>
+      <div class="mono dim" style="font-size:22px; margin-top:14px">Before ending, run the audit on what you changed, including any state you built (an open dialog, an error state) with --interact:</div>
+      <div class="mono acc" style="font-size:22px; margin-top:12px">  npx a11y-loop audit &lt;url of the running dev server&gt; --out .a11y/run-1.json --quiet</div>
+      <div class="mono dim" style="font-size:22px; margin-top:12px">Fix what it reports in the source, re-audit to a new file, and compare.</div>
+    </div>
+    <div class="caption" data-om-id="cap-gate">Before it says “done”, it runs the audit.<small>Claude Code Stop hook · asks once per session</small></div>
+  </section>
+
+  <!-- 6 · AUDIT (burst) + 7 · FIX share one stage ───────────── -->
+  <section class="scene" id="s-audit">
+    <div class="win" id="aterm" style="left:70px; top:120px; width:930px; height:780px" data-om-id="audit-terminal">
+      <div class="win-bar"><i></i><i></i><i></i><span>Terminal</span></div>
+      <div class="term" style="padding-bottom:6px"><span class="p">$ </span><span id="t-audit"></span><span id="t-audit2"></span></div>
+      <div class="mono dim" id="a-target" style="font-size:20px; padding:0 32px">demo/before/index.html · Target standard: WCAG 2.2 Level AA</div>
+      <div class="vhead"><svg class="loopicon" id="loopicon" viewBox="0 0 100 100"><g fill="none" stroke="currentColor" stroke-width="6" stroke-linecap="round"><path d="M 30 70 Q 55 76, 72 58"/><path d="M 72 58 Q 68 30, 48 22"/><path d="M 48 22 Q 20 32, 30 70"/></g><circle cx="30" cy="70" r="9" fill="currentColor"/><circle cx="72" cy="58" r="9" fill="currentColor"/><circle cx="48" cy="22" r="9" fill="currentColor"/></svg><span id="vcount" class="bad">VIOLATIONS (0)</span></div>
+      <div id="vrows"></div>
+    </div>
+    <div class="win" id="abrowser" style="left:1030px; top:120px; width:820px; height:780px" data-om-id="browser-passes">
+      <div class="win-bar"><i></i><i></i><i></i><div class="urlbar">127.0.0.1:63749 · Chromium 156</div></div>
+      <div class="page" id="passpage">
+        <img class="pass" id="p-default" src="assets/shots/before-default.png" alt="">
+        <img class="pass" id="p-dark" src="assets/shots/before-dark.png" alt="">
+        <img class="pass" id="p-forced" src="assets/shots/before-forced.png" alt="">
+        <img class="pass" id="p-motion" src="assets/shots/before-motion.png" alt="">
+        <img class="pass narrow" id="p-reflow" src="assets/shots/before-reflow.png" alt="">
+        <img class="pass" id="p-modal" src="assets/shots/before-modal.png" alt="">
+        <img class="pass" id="p-after" src="assets/shots/after-default.png" alt="">
+        <div class="hl" id="hl1" style="left:452px; top:12px; width:280px; height:28px"></div>
+        <div class="hl" id="hl2" style="left:754px; top:8px; width:30px; height:34px"></div>
+        <div class="hl" id="hl3" style="left:236px; top:164px; width:180px; height:40px"></div>
+        <div class="hl" id="hl4" style="left:0; top:244px; width:820px; height:24px"></div>
+        <div class="hl" id="hl5" style="left:236px; top:340px; width:440px; height:22px"></div>
+        <div class="passchip" id="passchip" data-layout-allow-overlap><span id="passname">Pass 1/5 · Default</span></div>
+      </div>
+    </div>
+    <div class="win" id="ccard" style="left:1030px; top:120px; width:820px; height:780px; visibility:hidden" data-om-id="contrast-fix">
+      <div class="win-bar"><i></i><i></i><i></i><span>a11y-loop contrast "#8fa0ab" "#ffffff" --fix</span></div>
+      <div class="sw" style="left:70px; top:200px; color:#8fa0ab">Aa</div>
+      <div class="sw" style="left:450px; top:200px; color:#697983" id="sw-new">Aa</div>
+      <div class="mono" style="position:absolute; left:384px; top:270px; font-size:48px; color:var(--dim)">→</div>
+      <div class="swl" style="left:70px; top:436px"><span class="dim">#8fa0ab</span><br><span class="bad">2.69:1 · FAIL AA</span></div>
+      <div class="swl" style="left:450px; top:436px" id="swl-new"><span class="dim">#697983</span><br><span class="ok">4.50:1 · passes AA</span></div>
+      <div class="mono dim" style="position:absolute; left:70px; right:40px; top:560px; font-size:20px">hue and chroma kept (OKLCh) · SC 1.4.3 needs 4.5:1</div>
+    </div>
+    <div class="caption" id="cap-audit1" data-om-id="cap-audit">Audited in a real browser.<small>axe-core plus a11y-loop’s own checks: focus, keyboard, dialogs, reflow, motion</small></div>
+    <div class="caption" id="cap-audit2" data-om-id="cap-audit-2">Five rendering passes. Plus the states it built.<small>default · dark · forced colors · reduced motion · 320 px reflow · <span class="mono">--interact</span> states</small></div>
+    <div class="caption" id="cap-fix" data-om-id="cap-fix">It fixes the source, then audits again.<small>contrast fixes come with the color that passes</small></div>
+  </section>
+
+  <!-- 8 · CONVERGED ─────────────────────────────────────────── -->
+  <section class="scene" id="s-conv">
+    <div class="mono dim" style="position:absolute; left:0; right:0; top:200px; text-align:center; font-size:30px"><span class="acc">$</span> a11y-loop diff --before run-1.json --after run-2.json</div>
+    <div class="conv" id="convline" data-om-id="converged">Converged: all 159 violations fixed, none introduced</div>
+    <div class="nums" data-om-id="count"><span class="from">159</span><span class="arr">→</span><span class="to">0</span></div>
+    <div class="foot" id="convfoot">detectable failures on the repo’s seeded demo page · five passes · axe-core 4.14.0</div>
+    <div class="caption" data-om-id="cap-conv">The loop ends when the diff says so.<small>FIXED · NEW · REMAINING by fingerprint. A new violation fails the run.</small></div>
+  </section>
+
+  <!-- 9 · HONEST ────────────────────────────────────────────── -->
+  <section class="scene" id="s-honest">
+    <div class="win" style="left:250px; top:130px; width:1420px; height:590px" data-om-id="manual-checklist">
+      <div class="win-bar"><i></i><i></i><i></i><span>a11y-loop audit · report</span></div>
+      <div class="sum"><span class="ok">No automatically detectable failures</span> · <span class="warn">44 to review</span> · 0 best-practice · <span class="acc">15 manual checks</span></div>
+      <div class="mitem" id="m0"><i></i><span class="sc">AT</span><span>Test with a real screen reader (NVDA or JAWS on Windows, VoiceOver on macOS/iOS).</span></div>
+      <div class="mitem" id="m1"><i></i><span class="sc">SC 2.4.3</span><span>Tab through the page and confirm the focus order is logical, not merely present.</span></div>
+      <div class="mitem" id="m2"><i></i><span class="sc">SC 2.1.1</span><span>Complete the page’s main task using only the keyboard.</span></div>
+      <div class="mitem" id="m3"><i></i><span class="sc">SC 1.4.1</span><span>Confirm colour is never the only way information is conveyed.</span></div>
+      <div class="mitem" id="m4"><i></i><span class="sc">SC 2.1.2</span><span>Confirm each dialog announces itself on open and describes how to dismiss it.</span></div>
+      <div class="mitem" id="m5"><i></i><span class="sc">SC 1.4.11</span><span>Check the contrast of hover and focus states.</span></div>
+      <div class="mitem dim" id="m6" style="font-size:23px">… and 9 more, each with the reason automation cannot judge it.</div>
+    </div>
+    <div class="claim" id="claim" data-om-id="claim">A clean audit is not a conformance claim.</div>
+    <div class="caption" style="bottom:40px" data-om-id="cap-honest">It tells you what it could not check.</div>
+  </section>
+
+  <!-- 10 · AGENTS (burst 2) ─────────────────────────────────── -->
+  <section class="scene" id="s-agents">
+    <div class="atitle" data-om-id="agents-title">Built for agents, <span>end to end.</span></div>
+    <div class="card" id="c0" style="left:160px; top:290px" data-om-id="card-mcp"><h3>MCP server</h3><div class="m">a11y-loop mcp</div><p>6 tools: audit, diff, contrast fix, plan check, doctor, manual checklist</p></div>
+    <div class="card" id="c1" style="left:710px; top:290px" data-om-id="card-json"><h3>Reports for machines</h3><div class="m">--json · --sarif · --out</div><p>Stable finding IDs, so <span class="mono">diff</span> can tell fixed from new</p></div>
+    <div class="card" id="c2" style="left:1260px; top:290px" data-om-id="card-exit"><h3>Exit codes as a contract</h3><div class="m">0 clean · 1 findings<br>2 tool error</div><p>An agent branches on them</p></div>
+    <div class="card" id="c3" style="left:160px; top:630px" data-om-id="card-headless"><h3>Never waits on a human</h3><div class="m">no TTY · no prompts</div><p>Every install and audit command runs headless</p></div>
+    <div class="card" id="c4" style="left:710px; top:630px" data-om-id="card-ci"><h3>Runs in CI</h3><div class="m">uses: ChanMeng666/<br>a11y-loop@v0.4.1</div><p>GitHub Action, result in the job summary</p></div>
+    <div class="card" id="c5" style="left:1260px; top:630px" data-om-id="card-skill"><h3>An open Agent Skill</h3><div class="m">npx skills add …</div><p>Claude Code · Codex · Cursor · Copilot · Gemini CLI</p></div>
+  </section>
+
+  <!-- 11 · END ──────────────────────────────────────────────── -->
+  <section class="scene" id="s-end">
+    <svg class="logo" viewBox="0 0 100 100" data-om-id="logo" role="img" aria-label="a11y-loop logo">
+      <g fill="none" stroke="var(--accent)" stroke-width="3" stroke-linecap="round">
+        <path class="arc" d="M 30 70 Q 55 76, 72 58"/><path class="arc" d="M 72 58 Q 68 30, 48 22"/><path class="arc" d="M 48 22 Q 20 32, 30 70"/>
+      </g>
+      <circle class="dot" cx="30" cy="70" r="6" fill="var(--accent)"/><circle class="dot" cx="72" cy="58" r="6" fill="var(--accent)"/><circle class="dot" cx="48" cy="22" r="6" fill="var(--accent)"/>
+    </svg>
+    <div class="word" data-om-id="wordmark">a11y-loop</div>
+    <div class="tagline" data-om-id="tagline" data-var-text="tagline">Accessible UI, checked in a real browser.</div>
+    <div class="pill" data-om-id="install-pill"><span class="p">$ </span><span data-var-text="installCmd">npx skills add ChanMeng666/a11y-loop</span></div>
+    <div class="cli" data-om-id="cli-line">CLI: npm i -g a11y-loop · a11y-loop install-browser</div>
+    <div class="url" data-om-id="url" data-var-text="repoUrl">github.com/ChanMeng666/a11y-loop · open source · MIT</div>
+  </section>
+
+  <!-- persistent layers -->
+  <div id="tracker" data-om-id="tracker">
+    <div class="step" id="st0"><b>✓</b>PLAN</div><div class="link"></div>
+    <div class="step" id="st1"><b>✓</b>WRITE</div><div class="link"></div>
+    <div class="step" id="st2"><b>✓</b>AUDIT</div><div class="link"></div>
+    <div class="step" id="st3"><b>✓</b>FIX</div><div class="link"></div>
+    <div class="step" id="st4"><b>✓</b>REPORT</div>
+  </div>
+  <div id="kbd-wrap" data-om-id="keyboard"><div id="kbd"></div></div>
+  <div id="ripple"></div>
+  <svg id="cursor" viewBox="0 0 24 24" data-om-id="cursor"><path d="M4 2 L4 20 L9 15.5 L12.5 22 L15.5 20.6 L12.2 14.2 L18.5 14 Z" fill="#fff" stroke="#0A0F1C" stroke-width="1.4" stroke-linejoin="round"/></svg>
+</div>
+
+<script type="text/vnd.abc" id="om-score">
+X:1
+T:a11y-loop · launch cue (hook -> install -> plan -> build -> gate -> audit burst -> stop -> fix drop -> converged -> honest -> agents -> end)
+M:4/4
+L:1/8
+Q:1/4=120
+K:Am
+V:PNO inst=piano role=melody gain=0.85
+!mark:hook! !mp! e2 c2 A2 z2 | c2 A2 F2 z2 | !mark:install! e2 c2 A2 z2 | c2 A2 F2 z2 |
+e2 G2 d2 G2 | !mark:plan! z8 | z8 | z8 |
+z8 | !mark:build! z8 | z8 | !mark:gate! z8 |
+!mark:audit! z8 | z8 | z8 | z8 |
+!mark:fix! z8 | z8 | z8 | !mark:converged! [FAc]4 [FAc]4 |
+[EGc]4 [EGc]4 | !mark:honest! !p! e2 c2 A2 z2 | c2 A2 F2 z2 | d2 B2 G2 z2 |
+!mark:agents! z8 | z8 | z8 | !mark:end! !f! [C,G,CEc]8 |
+!mp! c2 A2 F2 z2 | d2 B2 G2 z2 | !mp! [C,G,CEGc]8 |
+V:MAR inst=marimba gain=0.5
+!mp! A,CEAECEC | F,A,CFCA,CA, | A,CEAECEC | F,A,CFCA,CA, |
+CEGcG,B,DG | !p! A,CEAECEC | F,A,CFCA,CA, | CEGcGEGE |
+G,B,DGDB,DB, | A,CEAECEC | F,A,CFG,B,DG | z8 |
+!mf! A,CEAECEC | F,A,CFCA,CA, | CEGcGEGE | z8 |
+z8 | z8 | z8 | z8 |
+z8 | z8 | z8 | z8 |
+!mf! A,CEAECEC | F,A,CFCA,CA, | G,B,DGDB,DB, | z8 |
+z8 | z8 | z8 |
+V:PIZ inst=pizz gain=0.6
+z8 | z8 | z8 | z8 |
+z8 | !mf! [A,E]2 z2 [A,E]2 z2 | [F,C]2 z2 [F,C]2 z2 | [C,G,]2 z2 [C,G,]2 z2 |
+[G,D]2 z2 [G,D]2 z2 | z8 | z8 | z8 |
+z8 | z8 | z8 | z8 |
+!f! [A,E][A,E] [A,E][A,E] [A,E][A,E] [A,E][A,E] | [F,C][F,C] [F,C][F,C] [F,C][F,C] [F,C][F,C] | [C,G,][C,G,] [C,G,][C,G,] [C,G,][C,G,] [C,G,][C,G,] | z8 |
+z8 | z8 | z8 | z8 |
+z8 | z8 | z8 | z8 |
+z8 | z8 | z8 |
+V:STR inst=strings gain=0.7
+z8 | z8 | z8 | z8 |
+z8 | z8 | z8 | z8 |
+z8 | !p! !crescendo(! [A,CE]8 | [F,A,C]4 [G,B,D]4 !crescendo)! | !mf! [E,^G,B,]8 |
+!mf! [A,CE]8 | [F,A,C]8 | [CEG]8 | [G,B,D]4 z4 |
+!ff! [A,CE]8 | [F,A,C]8 | [CEG]4 [G,B,D]4 | [F,A,C]8 |
+[CEG]8 | !pp! [A,CE]8 | [F,A,C]8 | [G,B,D]8 |
+z8 | z8 | z8 | !mf! [CEG]8 |
+!p! [F,A,C]8 | [G,B,D]8 | [CEG]8 |
+V:VLN inst=violins role=melody gain=0.75
+z8 | z8 | z8 | z8 |
+z8 | z8 | z8 | z8 |
+z8 | z8 | z8 | z8 |
+z8 | z8 | z8 | z8 |
+!ff! [ee']3 [cc']3 [Aa]2 | [cc']3 [Aa]3 [Ff]2 | [ee']2 [cc']2 [dd']2 [Bb]2 | [cc']4 [ff']4 |
+[ee']8 | z8 | z8 | z8 |
+z8 | z8 | z8 | z8 |
+z8 | z8 | z8 |
+V:HRN inst=horn gain=0.6
+z8 | z8 | z8 | z8 |
+z8 | z8 | z8 | z8 |
+z8 | z8 | z8 | z8 |
+z8 | z8 | z8 | z8 |
+z8 | z8 | z8 | !f! [FAc]8 |
+[EGc]8 | z8 | z8 | z8 |
+z8 | z8 | z8 | !mf! [EGc]2 z6 |
+z8 | z8 | z8 |
+V:VIB inst=vibes gain=0.55
+z8 | z8 | z8 | z8 |
+z8 | z8 | z8 | z8 |
+z8 | z8 | z8 | z8 |
+z8 | z8 | z8 | z8 |
+z8 | z8 | z8 | z8 |
+z8 | !mp! a2 c2 e2 c2 | f2 a2 c2 a2 | g2 b2 d2 b2 |
+z8 | z8 | z8 | z8 |
+z8 | z8 | z8 |
+V:BAS inst=bass gain=0.8
+z8 | z8 | !mf! A,A,A,A, A,A,A,A, | F,F,F,F, F,F,F,F, |
+C,C,C,C, G,G,G,G, | A,3 A,3 A,2 | F,3 F,3 F,2 | C,3 C,3 C,2 |
+G,3 G,3 G,2 | A,A,A,A, A,A,A,A, | F,F,F,F, G,G,G,G, | E,8 |
+!f! A,A,A,A, A,A,A,A, | F,F,F,F, F,F,F,F, | C,C,C,C, C,C,C,C, | G,G,G,G, z4 |
+!ff! A,A,A,A, A,A,A,A, | F,F,F,F, F,F,F,F, | C,C,C,C, G,G,G,G, | F,3 F,3 F,2 |
+C,3 C,3 C,2 | !mp! A,8 | F,8 | G,8 |
+A,A,A,A, A,A,A,A, | F,F,F,F, F,F,F,F, | G,G,G,G, G,G,G,G, | C,8 |
+z8 | z8 | z8 |
+V:DR inst=drums kit=acoustic gain=0.85
+!mp! [^C,C,,]^F,, ^F,,^F,, C,,^F,, ^F,,^F,, | C,,^F,, ^F,,^F,, C,,^F,, ^F,,^F,, | !mf! [^C,C,,]^F,, [D,,^F,,]^F,, C,,C,, [D,,^F,,]^F,, | C,,^F,, [D,,^F,,]^F,, C,,C,, [D,,^F,,]^F,, |
+C,,^F,, [D,,^F,,]^F,, D,,/D,,/D,,/D,,/ D,,/D,,/D,,/D,,/ | C,,^F,, ^F,,^F,, [D,,^F,,]^F,, ^F,,^F,, | C,,^F,, ^F,,^F,, [D,,^F,,]^F,, ^F,,^F,, | C,,^F,, ^F,,^F,, [D,,^F,,]^F,, ^F,,^F,, |
+C,,^F,, ^F,,^F,, [D,,^F,,]^F,, D,,/D,,/D,,/D,,/ | !crescendo(! [C,,^F,,]^F,, [C,,^F,,]^F,, [C,,^F,,]^F,, [C,,^F,,]^F,, | [C,,^F,,]^F,, [C,,^F,,]^F,, D,,/D,,/D,,/D,,/ D,,/D,,/D,,/D,,/ !crescendo)! | !mf! [^C,C,,]z z2 z4 |
+!f! [^C,C,,]^F,, [D,,^F,,]^F,, C,,C,, [D,,^F,,]^F,, | [C,,^F,,]/^F,,/ ^F,,/^F,,/ [D,,^F,,]/^F,,/ ^F,,/^F,,/ [C,,^F,,]/^F,,/ [C,,^F,,]/^F,,/ [D,,^F,,]/^F,,/ ^F,,/^F,,/ | [C,,^F,,]/^F,,/ ^F,,/^F,,/ [D,,^F,,]/^F,,/ ^F,,/^F,,/ [C,,^F,,]/^F,,/ [C,,^F,,]/^F,,/ [D,,^F,,]/^F,,/ ^F,,/^F,,/ | !crescendo(! D,,/D,,/D,,/D,,/ D,,/D,,/D,,/D,,/ !crescendo)! !rise(! z4 |
+!rise)! !hit! !ff! [^C,C,,]^F,, [D,,^F,,]^F,, C,,C,, [D,,^F,,]^F,, | C,,^F,, [D,,^F,,]^F,, C,,C,, [D,,^F,,]^F,, | C,,^F,, [D,,^F,,]^F,, D,,/D,,/D,,/D,,/ D,,/D,,/D,,/D,,/ | !f! [^C,C,,]^F,, ^F,,^F,, [D,,^F,,]^F,, ^F,,^F,, |
+C,,^F,, ^F,,^F,, [D,,^F,,]^F,, ^F,,^F,, | !mp! C,,2 z2 C,,2 z2 | C,,2 z2 C,,2 z2 | C,,2 z2 C,,2 z2 |
+!f! [^C,C,,]^F,, [D,,^F,,]^F,, C,,C,, [D,,^F,,]^F,, | C,,^F,, [D,,^F,,]^F,, C,,C,, [D,,^F,,]^F,, | C,,^F,, [D,,^F,,]^F,, D,,/D,,/D,,/D,,/ D,,/D,,/D,,/D,,/ | !mf! [^C,C,,]z z2 z4 |
+z8 | z8 | z8 |
+</script>
+
+<script>
+  const V = OM.vars();
+  OM.music({ bpm: 120 });
+  const B = (n) => OM.beat(n);           // beats → seconds (0.5 s)
+  const BAR = (n) => B((n - 1) * 4);     // bar n (1-based) → its downbeat
+  const $ = (s) => document.querySelector(s);
+  const tl = gsap.timeline({ paused: true, defaults: { ease: 'power3.out' } });
+  const rnd = OM.random(11);
+
+  // ── scenes: hard cuts on bar lines ───────────────────────────
+  const SCENES = [['hook', 's-hook', 1], ['install', 's-install', 3], ['plan', 's-plan', 6], ['build', 's-build', 10], ['gate', 's-gate', 12],
+    ['audit', 's-audit', 13], ['fix', null, 17], ['converged', 's-conv', 20], ['honest', 's-honest', 22], ['agents', 's-agents', 25], ['end', 's-end', 28]];
+  let prev = null;
+  for (const [name, id, bar] of SCENES) {
+    tl.addLabel('scene:' + name, BAR(bar));
+    if (!id) continue;
+    if (prev) tl.set('#' + prev, { visibility: 'hidden' }, BAR(bar));
+    tl.set('#' + id, { visibility: 'visible' }, BAR(bar));
+    prev = id;
+  }
+  gsap.set('#s-hook', { visibility: 'visible' });
+  // things that appear at a moment and must not exist before it
+  const appear = (sel, at, from = { y: 14 }, dur = .32) => {
+    gsap.set(sel, { autoAlpha: 0 });
+    tl.fromTo(sel, { autoAlpha: 0, ...from }, { autoAlpha: 1, x: 0, y: 0, scale: 1, duration: dur, immediateRender: false }, at);
+  };
+  const flips = [];
+  const flip = (at, on, off) => flips.push({ at, on, off, state: null });
+  const drawFlips = (t) => { for (const f of flips) { const s = t >= f.at; if (s !== f.state) { (s ? f.on : f.off)(); f.state = s; } } };
+  const vanish = (sel, at, dur = .25) => tl.to(sel, { autoAlpha: 0, duration: dur, ease: 'power2.in' }, at);
+
+  // ── typing engine (a pure function of t) ─────────────────────
+  const typers = [];
+  const type = (el, text, t0, t1, opts = {}) => {
+    const n = text.length, w = [];
+    for (let i = 0; i < n; i++) w.push(text[i] === ' ' ? 1.5 : .6 + rnd() * .8);
+    const sum = w.reduce((a, b) => a + b, 0);
+    let acc = 0;
+    const times = w.map((x) => { acc += x; return t0 + (acc / sum) * (t1 - t0); });
+    const ty = { el: typeof el === 'string' ? $(el) : el, text, t0, t1, times, kbd: !!opts.kbd, caretOff: opts.caretOff ?? t1 + .5 };
+    typers.push(ty);
+    times.forEach((tt, i) => { if (opts.sound !== false && i % 2 === 0 && text[i] !== ' ') OM.sfx('type', tt, { gain: opts.kbd ? .3 : .2, pan: ((i * 37) % 9 - 4) / 10 }); });
+    return ty;
+  };
+  const drawTypers = (t) => {
+    for (const ty of typers) {
+      let k = 0; while (k < ty.times.length && ty.times[k] <= t) k++;
+      const caret = t >= ty.t0 - .35 && t < ty.caretOff;
+      const s = ty.text.slice(0, k);
+      const html = s.replace(/[&<>]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' })[c]) + (caret ? '<span class="caret"></span>' : '');
+      if (ty.el._h !== html) { ty.el.innerHTML = html; ty.el._h = html; }
+    }
+  };
+
+  // ── keyboard ─────────────────────────────────────────────────
+  const ROWS = ['1234567890-', 'qwertyuiop', 'asdfghjkl:', 'zxcvbnm,./'];
+  const keyEls = {};
+  for (const r of ROWS) {
+    const row = document.createElement('div'); row.className = 'krow';
+    for (const c of r) { const k = document.createElement('div'); k.className = 'key'; k.textContent = c.toUpperCase(); keyEls[c] = k; row.appendChild(k); }
+    $('#kbd').appendChild(row);
+  }
+  { const row = document.createElement('div'); row.className = 'krow';
+    const sh = document.createElement('div'); sh.className = 'key wide'; sh.textContent = 'shift'; keyEls.shift = sh;
+    const sp = document.createElement('div'); sp.className = 'key space'; keyEls[' '] = sp;
+    const en = document.createElement('div'); en.className = 'key wide'; en.textContent = 'return'; keyEls.enter = en;
+    row.append(sh, sp, en); $('#kbd').appendChild(row); }
+  const keyFor = (ch) => { const c = ch.toLowerCase(); return keyEls[c] ? [keyEls[c], ch !== c ? keyEls.shift : null] : [null, null]; };
+  let pressedKeys = [];
+  const enterPresses = [];
+  const drawKeys = (t) => {
+    const want = [];
+    for (const ty of typers) {
+      if (!ty.kbd) continue;
+      for (let i = 0; i < ty.times.length; i++) {
+        if (t >= ty.times[i] && t < ty.times[i] + .085) { const [a, b] = keyFor(ty.text[i]); if (a) want.push(a); if (b) want.push(b); }
+      }
+    }
+    for (const at of enterPresses) if (t >= at && t < at + .12) want.push(keyEls.enter);
+    for (const k of pressedKeys) if (!want.includes(k)) k.classList.remove('down');
+    for (const k of want) k.classList.add('down');
+    pressedKeys = want;
+  };
+
+  // ── cursor (waypoints, eased glides, presses with a ripple) ──
+  const WAY = [
+    { t: 0, x: 1560, y: 1120 }, { t: 2.3, x: 1560, y: 1120 }, { t: 3.2, x: 1528, y: 458 }, { t: 3.9, x: 1528, y: 458 },
+    { t: 10.2, x: 1760, y: 1120 }, { t: 11.5, x: 1555, y: 820 }, { t: 12.6, x: 1555, y: 820 }, { t: 13.6, x: 1700, y: 1000 },
+  ];
+  const VIS = [[2.3, 3.98], [10.2, 13.9]];
+  const PRESS = [3.5, 12.0];
+  const p3 = (u) => 1 - Math.pow(1 - u, 3);
+  const cur = $('#cursor'), rip = $('#ripple');
+  const drawCursor = (t) => {
+    let x = WAY[0].x, y = WAY[0].y;
+    for (let i = 0; i < WAY.length - 1; i++) {
+      const a = WAY[i], b = WAY[i + 1];
+      if (t >= a.t && t <= b.t) { const u = p3((t - a.t) / Math.max(.001, b.t - a.t)); x = a.x + (b.x - a.x) * u; y = a.y + (b.y - a.y) * u; break; }
+      if (t > b.t) { x = b.x; y = b.y; }
+    }
+    const vis = VIS.some(([a, b]) => t >= a && t < b);
+    let s = 1, r = null;
+    for (const p of PRESS) { const d = t - p; if (d > -.08 && d < .12) s = .82; if (d >= 0 && d < .45) r = d / .45; }
+    cur.style.visibility = vis ? 'visible' : 'hidden';
+    cur.style.transform = `translate(${x - 6}px, ${y - 4}px) scale(${s})`;
+    rip.style.visibility = vis && r !== null ? 'visible' : 'hidden';
+    if (r !== null) { rip.style.transform = `translate(${x}px, ${y}px) scale(${.3 + r * 1.1})`; rip.style.opacity = String(1 - r); }
+  };
+  PRESS.forEach((p) => OM.sfx('click', p, { gain: .7 }));
+
+  // ── tracker ──────────────────────────────────────────────────
+  const TRACK = [[10, 0], [18, 1], [24, 2], [32, 3], [42, 4], [48, 5]];
+  const drawTracker = (t) => {
+    let active = -1; for (const [at, i] of TRACK) if (t >= at) active = i;
+    $('#tracker').style.visibility = t >= 10 && t < 54 ? 'visible' : 'hidden';
+    for (let i = 0; i < 5; i++) { const el = $('#st' + i); el.classList.toggle('on', i === active); el.classList.toggle('done', i < active); }
+  };
+  TRACK.slice(1).forEach(([at]) => OM.sfx('tick', at + .02, { gain: .35 }));
+
+  // ════ 1 · HOOK (bars 1–2) ════════════════════════════════════
+  gsap.set('#kbd-wrap', { visibility: 'visible' });
+  tl.fromTo('.hook-l1', { y: 30, autoAlpha: 0 }, { y: 0, autoAlpha: 1, duration: .6, ease: 'expo.out' }, 0);
+  tl.fromTo('.composer', { y: 40, scale: .97 }, { y: 0, scale: 1, duration: 1.2, ease: 'expo.out' }, 0);
+  tl.fromTo('#kbd', { y: 60 }, { y: 0, duration: 1.4, ease: 'expo.out' }, 0);
+  type('#t-prompt', 'Build a landing page for Aotearoa Web Summit 2026: hero, sponsor ticker, programme, register dialog.', .15, 3.15, { kbd: true, caretOff: 3.5 });
+  appear('.hook-l2', B(4), { y: 26 }, .5);
+  enterPresses.push(3.5);
+  tl.to('.send', { scale: .86, duration: .08, yoyo: true, repeat: 1, ease: 'power2.out' }, 3.46);
+
+  // ════ 2 · INSTALL (bars 3–5) ═════════════════════════════════
+  tl.to('#kbd-wrap', { y: 150, scale: .82, duration: .5, ease: 'expo.out' }, BAR(3));
+  tl.fromTo('#s-install .win', { y: 30, scale: .98 }, { y: 0, scale: 1, duration: .6, ease: 'expo.out', immediateRender: false }, BAR(3));
+  type('#t-skills', 'npx skills add ChanMeng666/a11y-loop -g -y', 4.1, 4.9, { kbd: true });
+  enterPresses.push(4.98);
+  appear('#o-skills', 5.15); OM.sfx('pop', 5.15, { note: 3, gain: .6 });
+  type('#t-npm', 'npm i -g a11y-loop', 5.3, 5.7, { kbd: true }); enterPresses.push(5.76);
+  type('#t-browser', 'a11y-loop install-browser', 5.85, 6.35, { kbd: true }); enterPresses.push(6.42);
+  type('#t-doctor', 'a11y-loop doctor', 6.5, 6.85, { kbd: true }); enterPresses.push(6.92);
+  ['#o-d1', '#o-d2', '#o-d3'].forEach((s, i) => { appear(s, 7.0 + i * .25, { x: -10 }); OM.sfx('tick', 7.0 + i * .25, { gain: .4 }); });
+  appear('#o-d4', BAR(5)); OM.sfx('ding', BAR(5), { note: 5, gain: .5 });
+  tl.to('#kbd-wrap', { y: 560, duration: .45, ease: 'power3.in' }, BAR(5) - .1);
+  tl.set('#kbd-wrap', { visibility: 'hidden' }, BAR(6));
+  gsap.utils.toArray('#s-install .chip').forEach((el, i) => {
+    const at = BAR(5) + .3 + i * B(.5);
+    appear(el, at, { y: 30, scale: .8 }, .4);
+    if (i) OM.sfx('pop', at, { note: i + 1, gain: .5, pan: (i - 3) / 4 });
+  });
+  appear('#cap-install', BAR(5) + .2, { y: 20 }, .45);
+
+  // ════ 3 · PLAN (bars 6–9) ════════════════════════════════════
+  tl.fromTo('#s-plan .agent', { y: 40, scale: .97 }, { y: 0, scale: 1, duration: .7, ease: 'expo.out', immediateRender: false }, BAR(6));
+  gsap.set('#secbox .secline', { autoAlpha: 0 });
+  appear('#gate-plan', BAR(7), { x: 120, scale: .96 }, .45);
+  OM.sfx('thud', BAR(7) + .05, { gain: .8 }); OM.sfx('glitch', BAR(7) + .05, { gain: .35 });
+  tl.fromTo('#gate-plan', { x: 0 }, { x: 14, duration: .06, yoyo: true, repeat: 3, ease: 'none', immediateRender: false }, BAR(7) + .45);
+  gsap.utils.toArray('#gate-plan .item').forEach((el, i) => appear(el, BAR(7) + .4 + i * .09, { x: 16 }, .25));
+  appear('#cap-plan', BAR(7) + .4, { y: 20 }, .45);
+  // the agent writes the section, one line per eighth
+  gsap.utils.toArray('#secbox .secline').forEach((el, i) => {
+    const at = BAR(8) + i * B(.5);
+    tl.fromTo(el, { autoAlpha: 0, x: -14 }, { autoAlpha: 1, x: 0, duration: .22, immediateRender: false }, at);
+    OM.sfx('type', at, { gain: .3 }); OM.sfx('type', at + .06, { gain: .22 });
+  });
+  // the same card turns green: 7 of 7
+  flip(BAR(9) + .1 + 2 * B(.25), () => { $('#gate-plan').classList.add('good'); $('#pg-head').className = 'head ok'; $('#pg-head').textContent = 'ok: this UI plan carries accessibility content'; $('#pg-n').className = 'ok'; },
+    () => { $('#gate-plan').classList.remove('good'); $('#pg-head').className = 'head bad'; $('#pg-head').textContent = 'FINDING: UI plan, accessibility thin or absent'; $('#pg-n').className = 'bad'; $('#pg-n').textContent = '0 of 7'; $('#pg-n')._t = null; });
+  gsap.utils.toArray('#gate-plan .item').forEach((el, i) => {
+    const at = BAR(9) + .1 + i * B(.25);
+    flip(at, () => { el.classList.add('yes'); el.querySelector('i').textContent = '✓'; }, () => { el.classList.remove('yes'); el.querySelector('i').textContent = '✕'; });
+    tl.fromTo(el, { scale: 1.12 }, { scale: 1, duration: .3, ease: OM.spring(.2), immediateRender: false }, at);
+    OM.sfx('pop', at, { note: i + 1, gain: .42 });
+  });
+  tl.fromTo('#gate-plan', { scale: 1.04 }, { scale: 1, duration: .5, ease: OM.spring(.15), immediateRender: false }, BAR(9));
+  OM.sfx('chime', BAR(9) + .02, { gain: .45 });
+
+  // ════ 4 · BUILD (bars 10–11) ═════════════════════════════════
+  const CODE = [
+    ['x', '<nav class="site-nav" aria-labelledby="primary-nav-heading">'],
+    ['x', '  <ul class="nav-list" role="menu">'],
+    ['x', '    <li><a href="#programme">Programme</a></li>'],
+    ['x', '    <li><a href="#speakers">Speakers</a></li>'],
+    ['x', '    <li><a href="#venue">Venue</a></li>'],
+    ['x', '  </ul>'],
+    ['x', '</nav>'],
+    ['x', '<button class="icon-btn hamburger" onclick="toggleNav()">'],
+    ['x', '  <svg width="18" height="18" aria-hidden="true">'],
+    ['x', '    <path d="M2 4h14M2 9h14M2 14h14" />'],
+    ['x', '  </svg>'],
+    ['x', '</button>'],
+    ['x', '<div class="ticker"><div class="ticker-track">'],
+    ['x', '  <span>Kōwhai Digital</span><span>Tūrangi Cloud</span>'],
+    ['x', '</div></div>'],
+    ['x', '<div class="modal" id="registerModal" role="dialog">'],
+    ['x', '  <div class="modal-close" onclick="closeRegister()">×</div>'],
+    ['x', '</div>'],
+  ];
+  const esc = (x) => x.replace(/[&<>]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' })[c]);
+  const hl = (src) => src.replace(/("[^"]*")|(<\/?)([a-z0-9]+)|\s([a-z-]+)(?==)|([<>&])/g, (m, str, open, tag, attr, ch) =>
+    str ? `<span class="s">${esc(str)}</span>` : open ? `${esc(open)}<span class="t">${tag}</span>` : attr ? ` <span class="a">${attr}</span>` : esc(ch));
+  CODE.forEach(([k, s], i) => {
+    const d = document.createElement('div'); d.innerHTML = k === 'c' ? `<span class="c">${s.replace(/</g, '&lt;')}</span>` : hl(s) || '&nbsp;';
+    $('#codebox').appendChild(d);
+    const at = BAR(10) + .05 + i * .17;
+    appear(d, at, { x: -10 }, .16);
+    if (i % 2 === 0) OM.sfx('type', at, { gain: .2 });
+  });
+  // the page assembles in four steps, on the beats
+  gsap.set('#build-shot', { clipPath: 'inset(0 0 77% 0)' });
+  [[0, '72%'], [1, '45%'], [2, '22%'], [3, '0%']].forEach(([i, b]) => {
+    const at = BAR(10) + .5 + i * B(2);
+    tl.to('#build-shot', { clipPath: `inset(0 0 ${b} 0)`, duration: .4, ease: 'expo.out' }, at);
+    OM.sfx('slide', at, { gain: .35 });
+  });
+  tl.fromTo('#build-shot', { y: 0 }, { y: -560, duration: 1.6, ease: 'power2.inOut', immediateRender: false }, BAR(11) + .3);
+
+  // ════ 5 · GATE (bar 12) ══════════════════════════════════════
+  type('#t-done', '✓ Done. The landing page is ready.', BAR(12) + .05, BAR(12) + .65, { caretOff: BAR(12) + .9 });
+  appear('#gate-stop', BAR(12) + B(2), { y: 80, scale: .97 }, .4);
+  OM.sfx('thud', BAR(12) + B(2) + .1, { gain: .85 }); OM.sfx('glitch', BAR(12) + B(2) + .1, { gain: .3 });
+  tl.fromTo('#s-gate .agent .body', { opacity: 1 }, { opacity: .45, duration: .3, immediateRender: false }, BAR(12) + B(2));
+
+  // ════ 6 · AUDIT burst (bars 13–16) ═══════════════════════════
+  tl.fromTo('#aterm', { x: -40 }, { x: 0, duration: .6, ease: 'expo.out', immediateRender: false }, BAR(13));
+  tl.fromTo('#abrowser', { x: 40 }, { x: 0, duration: .6, ease: 'expo.out', immediateRender: false }, BAR(13));
+  type('#t-audit', 'a11y-loop audit --file demo/before/index.html', BAR(13) + .05, BAR(13) + .85, { caretOff: BAR(13) + 1 });
+  appear('#a-target', BAR(13) + 1.0, { y: 6 }, .2);
+  flip(BAR(17), () => { $('#t-audit').style.display = 'none'; $('#a-target').textContent = 'demo/after/index.html · re-audit · Target standard: WCAG 2.2 Level AA'; },
+    () => { $('#t-audit').style.display = ''; $('#a-target').textContent = 'demo/before/index.html · Target standard: WCAG 2.2 Level AA'; });
+  type('#t-audit2', 'a11y-loop audit --file demo/after/index.html --out run-2.json', BAR(17) + .05, BAR(17) + .9, { caretOff: BAR(17) + 1.1 });
+  appear('#cap-audit1', BAR(13) + .2, { y: 20 }, .4);
+  vanish('#cap-audit1', BAR(14) - .1, .15);
+  appear('#cap-audit2', BAR(14), { y: 20 }, .3);
+  vanish('#cap-audit2', BAR(16) + B(2), .1);
+  // pass montage: one shot per beat, the chip slams with each cut
+  const PASSES = [['#p-default', 'Pass 1/5 · Default', BAR(13) + 1], ['#p-dark', 'Pass 2/5 · Dark mode', BAR(14)], ['#p-forced', 'Pass 3/5 · Forced colors', BAR(14) + B(1)],
+    ['#p-motion', 'Pass 4/5 · Reduced motion', BAR(14) + B(2)], ['#p-reflow', 'Pass 5/5 · 320 px reflow', BAR(14) + B(3)], ['#p-modal', 'State · open dialog (--interact)', BAR(15)],
+    ['#p-default', 'Every pass, every state', BAR(15) + B(1)]];
+  gsap.set('.pass', { autoAlpha: 0 }); gsap.set('#passchip', { autoAlpha: 0 }); gsap.set('.hl', { autoAlpha: 0 });
+  tl.set('#p-default', { autoAlpha: 1 }, BAR(13));
+  PASSES.forEach(([sel, name, at], i) => {
+    if (i) tl.set(PASSES[i - 1][0], { autoAlpha: 0 }, at);
+    tl.set(sel, { autoAlpha: 1 }, at);
+    tl.fromTo(sel, { scale: 1.08 }, { scale: 1, duration: B(1), ease: 'power2.out', immediateRender: false }, at);
+    tl.fromTo('#passchip', { autoAlpha: 1, scale: 1.15 }, { autoAlpha: 1, scale: 1, duration: .25, immediateRender: false }, at);
+    if (i) OM.sfx('hit', at, { gain: .5, pitch: 1 + i * .04 });
+  });
+  // the violations pour in on the default shot
+  gsap.utils.toArray('.hl').forEach((el, i) => { const at = BAR(15) + B(1.5) + i * B(.5); appear(el, at, { scale: 1.3 }, .2); OM.sfx('tick', at, { gain: .4, pitch: 1.2 }); });
+  const ROWS_V = [['SC 1.4.3', 'color-contrast', 104, 'axe'], ['SC 2.4.7', 'focus-not-visible', 18, 'a11y-loop'], ['SC 2.1.1', 'div-button', 8, 'a11y-loop'],
+    ['SC 1.1.1', 'image-alt', 6, 'axe'], ['SC 1.4.1', 'link-in-text-block', 5, 'axe'], ['SC 1.3.1', 'listitem', 4, 'axe'], ['SC 2.4.3', 'positive-tabindex', 3, 'axe'],
+    ['SC 2.4.4', 'link-name', 2, 'axe'], ['SC 4.1.2', 'button-name', 1, 'axe'], ['SC 2.2.2', 'reduced-motion-ignored', 1, 'a11y-loop'], ['SC 1.4.10', 'reflow-horizontal-scroll', 1, 'a11y-loop'],
+    ['', '+ 6 more rules', 6, '']];
+  const rowEls = ROWS_V.map(([sc, rule, n, by], i) => {
+    const d = document.createElement('div'); d.className = 'vrow';
+    d.innerHTML = `<span class="st">${rule.startsWith('+') ? '' : 'FAIL'}</span><span class="sc">${sc}</span><span class="rule">${rule}</span><span class="n">${n}</span><span class="by">${by}</span>`;
+    $('#vrows').appendChild(d);
+    const at = BAR(15) + B(2) + .05 + i * (B(4) - .15) / (ROWS_V.length - 1);
+    d._in = at;
+    appear(d, at, { x: 24 }, .14);
+    if (i % 2 === 0) OM.sfx('tick', at, { gain: .3 });
+    return d;
+  });
+  // the stop: the count lands, everything holds for half a bar
+  const STOP = BAR(16) + B(2);
+  tl.fromTo('#vcount', { scale: 1.25 }, { scale: 1, duration: .35, ease: 'expo.out', immediateRender: false }, STOP);
+  OM.sfx('glitch', STOP, { gain: .6 });
+
+  // ════ 7 · FIX — the drop (bars 17–19) ════════════════════════
+  appear('#cap-fix', BAR(17) + .15, { y: 20 }, .4);
+  tl.set('#abrowser', { visibility: 'hidden' }, BAR(17));
+  tl.set('#ccard', { visibility: 'inherit' }, BAR(17));
+  tl.fromTo('#ccard', { scale: .94, y: 20 }, { scale: 1, y: 0, duration: .6, ease: 'expo.out', immediateRender: false }, BAR(17));
+  appear('#sw-new', BAR(17) + B(2), { scale: .8 }, .4); appear('#swl-new', BAR(17) + B(2) + .1, { y: 10 }, .3);
+  OM.sfx('pop', BAR(17) + B(2), { note: 5, gain: .55 });
+  // back to the browser: the fixed page wipes in
+  tl.set('#ccard', { visibility: 'hidden' }, BAR(18) + B(2));
+  tl.set('#abrowser', { visibility: 'inherit' }, BAR(18) + B(2));
+  tl.set('.hl', { autoAlpha: 0 }, BAR(18) + B(2));
+  tl.set('#p-default', { autoAlpha: 1 }, BAR(18) + B(2));
+  tl.set('#p-after', { autoAlpha: 1, clipPath: 'inset(0 100% 0 0)' }, BAR(18) + B(2));
+  tl.to('#p-after', { clipPath: 'inset(0 0% 0 0)', duration: B(3), ease: 'power2.inOut' }, BAR(18) + B(2.5));
+  OM.sfx('whoosh', BAR(18) + B(3.5), { gain: .35 });
+  // rows flip to FIXED, one per eighth-ish, while the count falls
+  rowEls.forEach((d, i) => {
+    const at = BAR(17) + .6 + i * .36;
+    d._out = at;
+    const plus = ROWS_V[i][1].startsWith('+');
+    flip(at, () => { d.classList.add('fixed'); if (!plus) d.querySelector('.st').textContent = 'FIXED'; }, () => { d.classList.remove('fixed'); if (!plus) d.querySelector('.st').textContent = 'FAIL'; });
+    tl.fromTo(d, { x: 12 }, { x: 0, duration: .25, immediateRender: false }, at);
+    if (i % 2 === 0) OM.sfx('pop', at, { note: (i / 2) + 1, gain: .32, pan: .3 });
+  });
+  tl.fromTo('#loopicon', { rotation: 0 }, { rotation: 720, duration: 5.2, ease: 'power2.inOut', transformOrigin: '50% 55%', immediateRender: false }, BAR(17));
+  // the counter
+  const count = (t) => rowEls.reduce((n, d, i) => n + (t >= d._in && t < d._out ? ROWS_V[i][2] : 0), 0);
+  const ALLFIXED = rowEls[rowEls.length - 1]._out;
+  const vc = $('#vcount');
+  const drawCount = (t) => {
+    const n = count(t);
+    const first = rowEls[0]._in;
+    const txt = t < first ? 'running 5 passes…' : n > 0 ? `VIOLATIONS (${n})` : 'No automatically detectable failures';
+    const cls = t < first ? 'dim' : n > 0 ? 'bad' : 'ok';
+    if (vc._t !== txt) { vc.textContent = txt; vc._t = txt; vc.className = cls; }
+    $('#loopicon').style.color = t >= ALLFIXED ? 'var(--green)' : t >= BAR(17) || t < rowEls[0]._in ? 'var(--accent)' : 'var(--red)';
+  };
+  OM.sfx('ding', ALLFIXED, { note: 8, gain: .45 });
+
+  // ════ 8 · CONVERGED — the hero (bars 20–21) ══════════════════
+  tl.fromTo('#convline', { scale: 1.35, autoAlpha: 0 }, { scale: 1, autoAlpha: 1, duration: .5, ease: 'expo.out', immediateRender: false }, BAR(20));
+  gsap.set('#convline', { autoAlpha: 0 });
+  OM.sfx('impact', BAR(20), { gain: .9 });
+  appear('#s-conv .nums', BAR(20) + B(1), { y: 40, scale: .9 }, .5);
+  appear('#convfoot', BAR(20) + B(3), { y: 12 }, .4);
+  tl.fromTo('#s-conv .nums', { scale: 1 }, { scale: 1.04, duration: 3, ease: 'none', immediateRender: false }, BAR(20) + B(2));
+
+  // ════ 9 · HONEST (bars 22–24) ════════════════════════════════
+  tl.fromTo('#s-honest .win', { y: 30, scale: .98 }, { y: 0, scale: 1, duration: .6, ease: 'expo.out', immediateRender: false }, BAR(22));
+  for (let i = 0; i < 7; i++) { const at = BAR(22) + B(2) + i * B(1); appear('#m' + i, at, { x: -16 }, .3); if (i < 6) OM.sfx('tick', at, { gain: .4, pan: -.2 }); }
+  appear('#claim', BAR(23) + B(1), { y: 16 }, .5);
+  OM.sfx('thud', BAR(23) + B(1) + .08, { gain: .5 });
+
+  // ════ 10 · AGENTS — burst 2 (bars 25–27) ═════════════════════
+  appear('#s-agents .atitle', BAR(25), { x: -40 }, .5);
+  for (let i = 0; i < 6; i++) {
+    const at = BAR(25) + B(2) + i * B(1);
+    appear('#c' + i, at, { y: 60, scale: .9 }, .35);
+    OM.sfx('hit', at, { gain: .45, pitch: 1 + i * .05 });
+  }
+  tl.fromTo('#s-agents .card', { y: 0 }, { y: -8, duration: 2, ease: 'sine.inOut', immediateRender: false, stagger: .1 }, BAR(26) + B(3));
+
+  // ════ 11 · END (bars 28–31) ══════════════════════════════════
+  const arcs = gsap.utils.toArray('#s-end .arc');
+  arcs.forEach((a, i) => { const L = a.getTotalLength(); gsap.set(a, { strokeDasharray: L, strokeDashoffset: L });
+    tl.to(a, { strokeDashoffset: 0, duration: .7, ease: 'power2.inOut' }, BAR(28) + i * B(1)); });
+  gsap.utils.toArray('#s-end .dot').forEach((d, i) => { appear(d, BAR(28) + i * B(1), { scale: 0 }, .35); gsap.set(d, { transformOrigin: '50% 50%' }); OM.sfx('pop', BAR(28) + i * B(1), { note: [1, 3, 5][i], gain: .5 }); });
+  tl.fromTo('#s-end .logo', { rotation: -30 }, { rotation: 0, duration: 2, ease: 'expo.out', transformOrigin: '50% 50%', immediateRender: false }, BAR(28));
+  appear('#s-end .word', BAR(28) + B(3), { y: 30 }, .6); OM.sfx('chime', BAR(28) + B(3), { gain: .5 });
+  appear('#s-end .tagline', BAR(29), { y: 20 }, .6);
+  appear('#s-end .pill', BAR(29) + B(2), { y: 20 }, .5);
+  appear('#s-end .cli', BAR(29) + B(3), { y: 10 }, .5);
+  appear('#s-end .url', BAR(30), { y: 10 }, .5);
+  tl.to({}, { duration: V.endHold }, BAR(30) + B(2.4));
+
+  // ── camera: a slow push on every scene, so reading holds still travel ──
+  [['#s-hook', 0, 4, 1.03], ['#s-install', 4, 10, 1.06], ['#s-build', 18, 22, 1.03], ['#s-gate', 22, 24, 1.03],
+   ['#s-audit', 24, 38, 1.05], ['#s-conv', 38, 42, 1.07], ['#s-honest', 42, 48, 1.05], ['#s-agents', 48, 54, 1.04], ['#s-end', 54, 64, 1.05]]
+    .forEach(([sel, a, z, s]) => tl.fromTo(sel, { scale: 1 }, { scale: s, duration: z - a, ease: 'none', transformOrigin: '50% 46%', immediateRender: false }, a));
+  // plan: push toward Approve with the cursor, snap wide when the gate lands, then drift toward the plan text
+  tl.fromTo('#s-plan', { scale: 1 }, { scale: 1.08, duration: 1.5, ease: 'power3.inOut', transformOrigin: '82% 75%', immediateRender: false }, BAR(6) + .3);
+  tl.to('#s-plan', { scale: 1, duration: .35, ease: 'expo.out' }, BAR(7) - .05);
+  tl.fromTo('#s-plan', { scale: 1 }, { scale: 1.06, duration: 5.6, ease: 'none', transformOrigin: '30% 50%', immediateRender: false }, BAR(7) + .4);
+  OM.sfx('whoosh', BAR(7) - .05, { gain: .25 });
+  // the stop: punch in on the count, the browser falls back; the drop cuts back to the wide shot
+  tl.fromTo('#aterm', { scale: 1 }, { scale: 1.07, duration: .4, ease: 'expo.out', transformOrigin: '6% 30%', immediateRender: false }, STOP);
+  tl.fromTo('#abrowser', { opacity: 1 }, { opacity: .25, duration: .3, immediateRender: false }, STOP);
+  tl.set('#aterm', { scale: 1 }, BAR(17)); tl.set('#abrowser', { opacity: 1 }, BAR(17));
+  // the last chord: the loop pulses once
+  tl.fromTo('#s-end .logo', { scale: 1 }, { scale: 1.1, duration: B(1), ease: 'power2.out', yoyo: true, repeat: 1, immediateRender: false }, BAR(31));
+  OM.sfx('sparkle', BAR(31), { gain: .35 });
+
+  // ── one clock drives everything computed from t ─────────────
+  const pn = $('#passname');
+  const drawPass = (t) => { let name = PASSES[0][1]; for (const [, nm, at] of PASSES) if (t >= at) name = nm; if (t >= BAR(18) + B(2)) name = 'Re-audit · demo/after'; if (pn._t !== name) { pn.textContent = name; pn._t = name; } };
+  const pgn = $('#pg-n');
+  const drawPlanCount = (t) => { if (t < BAR(9)) return; let k = 0; for (let i = 0; i < 7; i++) if (t >= BAR(9) + .1 + i * B(.25)) k++; const x = `${k} of 7`; if (pgn._t !== x) { pgn.textContent = x; pgn._t = x; } };
+  const draw = (t) => { drawFlips(t); drawPlanCount(t); drawPass(t); drawTypers(t); drawKeys(t); drawCursor(t); drawTracker(t); drawCount(t); };
+  OM.clock(tl, draw, tl.duration());
+
+  window.__timelines['film'] = tl;
+</script>
+</body>
+</html>
