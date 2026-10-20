@@ -8,7 +8,11 @@ One HTML file is the whole film: a rebuilt agent window, terminal, keyboard and 
 
 </div>
 
-<!-- VIDEO PLACEHOLDER: drag the MP4 into this spot in the GitHub editor, then delete this comment. -->
+
+
+https://github.com/user-attachments/assets/117274d5-ca7b-4d12-bd75-aea07845cc07
+
+
 
 > 🎬 **Video coming soon.** The film will be embedded here.
 
